@@ -20,7 +20,9 @@ jobs:
       - name: Android SDK prüfen
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
-          sdkmanager --version
+          ls -la "$ANDROID_HOME/cmdline-tools"
+          find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f
+
       - name: Android API 35 installieren
         run: |
           yes | sdkmanager --licenses || true
