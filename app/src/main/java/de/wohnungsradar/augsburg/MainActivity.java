@@ -56,8 +56,16 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
         prefs = getSharedPreferences(FeedSync.PREFS, 0);
-        AlertChannels.ensure(this);
-        FeedJobService.schedule(this);
+        try {
+            AlertChannels.ensure(this);
+        } catch (RuntimeException e) {
+            android.util.Log.e("WohnungsRadar", "Notification setup failed", e);
+        }
+        try {
+            FeedJobService.schedule(this);
+        } catch (RuntimeException e) {
+            android.util.Log.e("WohnungsRadar", "Job scheduling failed", e);
+        }
         handleSharedIntent(getIntent());
     }
     @Override protected void onNewIntent(Intent intent) {
