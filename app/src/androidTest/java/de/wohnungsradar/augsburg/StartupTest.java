@@ -63,6 +63,19 @@ public class StartupTest {
             try (OfferDb db = new OfferDb(context())) {
                 long count = db.all().stream().filter(offer -> url.equals(offer.url)).count();
                 assertEquals("Shared offer should be stored exactly once", 1L, count);
+                for (OfferDb.Offer offer : db.all()) {
+                    if (url.equals(offer.url)) db.delete(offer.id);
+                }
+            }
+            scenario.recreate();
+            try (OfferDb db = new OfferDb(context())) {
+                assertFalse("Recreation must not reimport a deleted shared offer",
+                        db.all().stream().anyMatch(offer -> url.equals(offer.url)));
+            }
+            scenario.onActivity(activity -> activity.onNewIntent(intent));
+            try (OfferDb db = new OfferDb(context())) {
+                assertEquals("A newly delivered share must still be imported", 1L,
+                        db.all().stream().filter(offer -> url.equals(offer.url)).count());
             }
         }
     }

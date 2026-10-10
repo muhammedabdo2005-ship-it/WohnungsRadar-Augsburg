@@ -66,7 +66,8 @@ public class MainActivity extends Activity {
         } catch (RuntimeException e) {
             android.util.Log.e("WohnungsRadar", "Job scheduling failed", e);
         }
-        handleSharedIntent(getIntent());
+        // Recreation restores the existing screen; do not import its share again.
+        if (savedState == null) handleSharedIntent(getIntent());
     }
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent); setIntent(intent); handleSharedIntent(intent); render();
@@ -170,8 +171,7 @@ public class MainActivity extends Activity {
         } else if (Intent.ACTION_VIEW.equals(action) && intent.getData() != null) {
             saveShared(intent.getDataString(), "Geteiltes Immobilienangebot");
         }
-        // Clear the intent so reopening the app does not reprocess shared content.
-        setIntent(new Intent(this, MainActivity.class));
+        // Preserve the launch intent: Android and lifecycle observers use its identity.
     }
     private void saveShared(String content, String title) {
         if (content == null) return;
