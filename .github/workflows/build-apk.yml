@@ -19,8 +19,12 @@ jobs:
           java-version: '17'
       - name: Android SDK installieren
         uses: android-actions/setup-android@v3
+
       - name: Android API 35 installieren
-        run: sdkmanager --install 'platforms;android-35' 'build-tools;35.0.0'
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
       - name: Gradle Wrapper mit Pruefsumme einrichten
         run: bash setup-wrapper.sh
       - name: Debug APK erstellen
