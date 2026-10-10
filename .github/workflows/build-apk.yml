@@ -62,10 +62,13 @@ jobs:
           api-level: 35
           arch: x86_64
           disable-animations: true
-          script: ./gradlew :app:connectedDebugAndroidTest --no-daemon
+          script: bash tests/run-android-tests.sh
       - name: Android-Testberichte bereitstellen
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Android-Starttests
-          path: app/build/reports/androidTests/connected/
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/outputs/androidTest-results/connected/
+            android-logcat.txt
