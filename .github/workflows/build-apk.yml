@@ -1,5 +1,6 @@
 name: Android APK erstellen
 on:
+  pull_request:
   workflow_dispatch:
   push:
     branches: [main, master]
@@ -36,11 +37,38 @@ jobs:
 
       - name: Gradle Wrapper mit Pruefsumme einrichten
         run: bash setup-wrapper.sh
-      - name: Debug APK erstellen
-        run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Hilfsfunktionen testen
+        run: |
+          mkdir -p /tmp/wohnungsradar-tests
+          javac -d /tmp/wohnungsradar-tests app/src/main/java/de/wohnungsradar/augsburg/ListingUtils.java tests/TestListingUtils.java
+          java -cp /tmp/wohnungsradar-tests TestListingUtils
+      - name: Debug APK und Starttests erstellen
+        run: ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
       - name: APK bereitstellen
         uses: actions/upload-artifact@v4
         with:
           name: WohnungsRadar-Debug-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: KVM für Android-Emulator aktivieren
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Start und JobScheduler auf Android 15 testen
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          disable-animations: true
+          script: bash tests/run-android-tests.sh
+      - name: Android-Testberichte bereitstellen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-Starttests
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/outputs/androidTest-results/connected/
+            android-logcat.txt
