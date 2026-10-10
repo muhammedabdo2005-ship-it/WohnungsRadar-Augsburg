@@ -57,6 +57,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedState);
         prefs = getSharedPreferences(FeedSync.PREFS, 0);
         AlertChannels.ensure(this);
+        render();
         FeedJobService.schedule(this);
         handleSharedIntent(getIntent());
     }
