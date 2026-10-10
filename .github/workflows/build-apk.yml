@@ -17,9 +17,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Android SDK installieren
-        uses: android-actions/setup-android@v3
-
+      - name: Android SDK prüfen
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          sdkmanager --version
       - name: Android API 35 installieren
         run: |
           yes | sdkmanager --licenses || true
