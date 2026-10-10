@@ -25,8 +25,14 @@ jobs:
 
       - name: Android API 35 installieren
         run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)
+          if [ -z "$SDKMANAGER" ]; then
+            echo "FEHLER: sdkmanager nicht gefunden"
+            exit 1
+          fi
+          echo "SDK-Manager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" --install "platforms;android-35" "build-tools;35.0.0" "platform-tools"
 
       - name: Gradle Wrapper mit Pruefsumme einrichten
         run: bash setup-wrapper.sh
